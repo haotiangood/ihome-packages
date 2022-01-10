@@ -11,7 +11,6 @@ PKG_RELEASE:=2
 #20220108
 
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Brook \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_PDNSD \
@@ -24,7 +23,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+dnsmasq-full +luci-compat +dns2socks +ipset +ip-full +ipt2socks +iptables-mod-tproxy +iptables-mod-iprange \
 	+libuci-lua +lua +luci-lib-jsonc +microsocks +tcping +resolveip \
 	+unzip \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG:chinadns-ng \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_PDNSD:pdnsd-alt \
