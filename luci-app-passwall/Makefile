@@ -6,9 +6,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-passwall
-PKG_VERSION:=4.50
+PKG_VERSION:=4.51
 PKG_RELEASE:=1
-#20220219
+#20220228
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_ChinaDNS_NG \
@@ -31,7 +31,7 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_PDNSD:pdnsd-alt \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_Trojan_GO:trojan-go \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_V2ray:v2ray-core \
-	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray:xray-core \
+	+PACKAGE_$(PKG_NAME)_INCLUDE_Xray:xray-core
 
 define Package/$(PKG_NAME)/config
 menu "Configuration"
@@ -47,7 +47,7 @@ config PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy
 config PACKAGE_$(PKG_NAME)_INCLUDE_IPv6_Nat
 	depends on PACKAGE_ip6tables
 	bool "Include IPv6 Nat"
-	default y
+	default n
 
 config PACKAGE_$(PKG_NAME)_INCLUDE_PDNSD
 	bool "Include PDNSD"

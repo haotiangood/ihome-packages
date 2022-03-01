@@ -286,7 +286,7 @@ load_acl() {
 							d_server=127.0.0.1
 							[ "$tcp_proxy_mode" = "global" ] && d_server=${d_server}#${_dns_port}
 							echo "server=${d_server}" >> $TMP_ACL_PATH/$sid/dnsmasq.conf
-							source $APP_PATH/helper_${DNS_N}.sh add DNS_MODE=$dns_mode TMP_DNSMASQ_PATH=$TMP_ACL_PATH/$sid/dnsmasq.d DNSMASQ_CONF_FILE=/dev/null LOCAL_DNS=$LOCAL_DNS TUN_DNS=127.0.0.1#${_dns_port} TCP_NODE=$tcp_node PROXY_MODE=${tcp_proxy_mode} NO_LOGIC_LOG=1 NO_PROXY_IPV6=${NO_PROXY_IPV6}
+							source $APP_PATH/helper_${DNS_N}.sh add DNS_MODE=$dns_mode TMP_DNSMASQ_PATH=$TMP_ACL_PATH/$sid/dnsmasq.d DNSMASQ_CONF_FILE=/dev/null LOCAL_DNS=$LOCAL_DNS TUN_DNS=127.0.0.1#${_dns_port} TCP_NODE=$tcp_node PROXY_MODE=${tcp_proxy_mode} NO_LOGIC_LOG=1 NO_PROXY_IPV6=${filter_proxy_ipv6}
 							ln_run "$(first_type dnsmasq)" "dnsmasq_${sid}" "/dev/null" -C $TMP_ACL_PATH/$sid/dnsmasq.conf -x $TMP_ACL_PATH/$sid/dnsmasq.pid
 							eval node_${tcp_node}_$(echo -n "${tcp_proxy_mode}${dns_forward}" | md5sum | cut -d " " -f1)=${dnsmasq_port}
 						}
@@ -823,6 +823,9 @@ add_firewall_rule() {
 	$ipt_n -A PSW $(dst $IPSET_VPSIPLIST) -j RETURN
 	$ipt_n -A PSW $(dst $IPSET_WHITELIST) -j RETURN
 	$ipt_n -A PSW -m mark --mark 0xff -j RETURN
+
+	WAN_IP=$(get_wan_ip)
+	[ ! -z "${WAN_IP}" ] && $ipt_n -A PSW $(comment "WAN_IP_RETURN") -d "${WAN_IP}" -j RETURN
 	
 	PR_INDEX=$(RULE_LAST_INDEX "$ipt_n" PREROUTING prerouting_rule 1)
 	PR_INDEX=$((PR_INDEX + 1))
@@ -853,7 +856,6 @@ add_firewall_rule() {
 	$ipt_m -A PSW -m mark --mark 0xff -j RETURN
 	$ipt_m -A PSW $(dst $IPSET_BLOCKLIST) -j DROP
 	
-	WAN_IP=$(get_wan_ip)
 	[ ! -z "${WAN_IP}" ] && $ipt_m -A PSW $(comment "WAN_IP_RETURN") -d "${WAN_IP}" -j RETURN
 	unset WAN_IP
 	
@@ -1194,9 +1196,15 @@ gen_include() {
 		PR_INDEX=\$((PR_INDEX + 1))
 		$ipt_m -I PREROUTING \$PR_INDEX -j PSW
 		
+		WAN_IP=\$(${MY_PATH} get_wan_ip)
+
+		PR_INDEX=\$(${MY_PATH} RULE_LAST_INDEX "$ipt_n" PSW WAN_IP_RETURN -1)
+		if [ \$PR_INDEX -ge 0 ]; then
+			[ ! -z "\${WAN_IP}" ] && $ipt_n -R PSW \$PR_INDEX $(comment "WAN_IP_RETURN") -d "\${WAN_IP}" -j RETURN
+		fi
+
 		PR_INDEX=\$(${MY_PATH} RULE_LAST_INDEX "$ipt_m" PSW WAN_IP_RETURN -1)
 		if [ \$PR_INDEX -ge 0 ]; then
-			WAN_IP=\$(${MY_PATH} get_wan_ip)
 			[ ! -z "\${WAN_IP}" ] && $ipt_m -R PSW \$PR_INDEX $(comment "WAN_IP_RETURN") -d "\${WAN_IP}" -j RETURN
 		fi
 		

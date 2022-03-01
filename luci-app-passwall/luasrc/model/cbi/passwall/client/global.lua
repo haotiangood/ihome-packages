@@ -71,12 +71,7 @@ local redir_mode_validate = function(self, value, t)
     return value
 end
 
-local status = m:get("@global_other[0]", "status") or ""
-if status:find("big_icon") then
-    m:append(Template(appname .. "/global/status"))
-else
-    m:append(Template(appname .. "/global/status2"))
-end
+m:append(Template(appname .. "/global/status"))
 
 s = m:section(TypedSection, "global")
 s.anonymous = true
@@ -171,7 +166,7 @@ end
 
 udp_node = s:taboption("Main", ListValue, "udp_node", "<a style='color: red'>" .. translate("UDP Node") .. "</a>")
 udp_node:value("nil", translate("Close"))
---udp_node.description = translate("For proxy game network, DNS hijack etc.") .. "<br />" .. translate("The selected server will not use Kcptun.")
+--udp_node.description = translate("For proxy game network.")
 udp_node:value("tcp", translate("Same as the tcp node"))
 
 s:tab("DNS", translate("DNS"))
@@ -186,6 +181,9 @@ if api.is_finded("smartdns") then
     group_domestic:depends("dns_shunt", "smartdns")
     group_domestic.description = translate("You only need to configure domestic DNS packets in SmartDNS and set it redirect or as Dnsmasq upstream, and fill in the domestic DNS group name here.")
 end
+
+o = s:taboption("DNS", Flag, "filter_proxy_ipv6", translate("Filter Proxy Host IPv6"), translate("Experimental feature."))
+o.default = "0"
 
 ---- DNS Forward Mode
 dns_mode = s:taboption("DNS", ListValue, "dns_mode", translate("Filter Mode"))
